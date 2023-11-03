@@ -14,6 +14,7 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation("io.ktor:ktor-server-core-jvm:2.3.5")
     implementation("io.ktor:ktor-server-netty-jvm:2.3.5")
+    implementation("io.ktor:ktor-server-status-pages:2.3.5")
     implementation("ch.qos.logback:logback-classic:1.4.4")
     implementation("org.slf4j:slf4j-api:2.0.3")
 }
