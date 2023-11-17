@@ -6,10 +6,11 @@ data class WebappConfig(
     val httpPort: Int
 )
 
-fun createAppConfig() = ConfigFactory
-    .parseResources("app.conf")
+fun createAppConfig(env: String) = ConfigFactory
+    .parseResources("app-${env}.conf")
+    .withFallback(ConfigFactory.parseResources("app.conf"))
     .resolve().let {
         WebappConfig(
-            httpPort = 4207,
+            httpPort = it.getInt("httpPort"),
         )
     }

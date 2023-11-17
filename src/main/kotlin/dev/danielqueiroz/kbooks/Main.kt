@@ -12,13 +12,12 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 val log: Logger? = LoggerFactory.getLogger("Main")
+val env = System.getenv("KOTLINBOOK_ENV") ?: "local"
 
-val config = ConfigFactory
-    .parseResources("app.conf")
-    .resolve()
+val config = createAppConfig(env)
 
 fun main(args: Array<String>) {
-    embeddedServer(Netty, port = config.getInt("httpPort")) {
+    embeddedServer(Netty, port = config.httpPort) {
         createKtorApplication()
     }.start(wait = true)
 }
