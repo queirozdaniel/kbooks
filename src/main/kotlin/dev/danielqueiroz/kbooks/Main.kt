@@ -1,6 +1,7 @@
 package dev.danielqueiroz.kbooks
 
 import com.typesafe.config.ConfigFactory
+import dev.danielqueiroz.kbooks.domain.WebappConfig
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -12,11 +13,22 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 val log: Logger? = LoggerFactory.getLogger("Main")
-val env = System.getenv("KOTLINBOOK_ENV") ?: "local"
-
-val config = createAppConfig(env)
-
 fun main(args: Array<String>) {
+
+    log?.debug("Starting application...")
+
+    val env = System.getenv("KOTLINBOOK_ENV") ?: "local"
+    log?.debug("Loading configuration for environment $env")
+
+    val config = ConfigFactory
+        .parseResources("app-${env}.conf")
+        .withFallback(ConfigFactory.parseResources("app.conf"))
+        .resolve().let {
+            WebappConfig(
+                httpPort = it.getInt("httpPort"),
+            )
+        }
+
     embeddedServer(Netty, port = config.httpPort) {
         createKtorApplication()
     }.start(wait = true)
