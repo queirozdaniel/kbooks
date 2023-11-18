@@ -22,6 +22,18 @@ sealed class WebResponse {
         )
 
     fun header(headerName: String, headerValue: String) = header(headerName, listOf(headerValue))
+
+    fun headers(): Map<String, List<String>> =
+        headers
+            .map { it.key.lowercase() to it.value }
+            .fold(mapOf()) { res, (k, v) ->
+                res.plus(
+                    Pair(
+                        k,
+                        res.getOrDefault(k, listOf()).plus(v)
+                    )
+                )
+            }
 }
 
 data class TextWebResponse(
