@@ -1,7 +1,7 @@
 package dev.danielqueiroz.kbooks
 
 import com.typesafe.config.ConfigFactory
-import dev.danielqueiroz.kbooks.domain.WebappConfig
+import dev.danielqueiroz.kbooks.domain.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -9,6 +9,7 @@ import io.ktor.server.netty.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.util.pipeline.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -46,9 +47,39 @@ fun Application.createKtorApplication() {
         }
     }
     routing {
-        get("/") {
-            call.respondText("Hello, World!")
-        }
+        get("/", webResponse{
+            TextWebResponse("Hello, World!")
+        })
     }
 
+}
+
+fun webResponse(
+    handler: suspend PipelineContext<Unit, ApplicationCall>.() -> WebResponse
+): PipelineInterceptor<Unit, ApplicationCall> {
+    return {
+        val resp = this.handler()
+        for ((name, values) in resp.headers())
+            for (value in values)
+                call.response.header(name, value)
+        val statusCode = HttpStatusCode.fromValue(
+            resp.statusCode
+        )
+        when (resp) {
+            is TextWebResponse -> {
+                call.respondText(
+                    text = resp.body,
+                    status = statusCode
+                )
+            }
+            is JsonWebResponse -> {
+                call.respond(
+                    KtorJsonWebResponse(
+                        body = resp.body,
+                        statusCode = statusCode
+                    )
+                )
+            }
+        }
+    }
 }

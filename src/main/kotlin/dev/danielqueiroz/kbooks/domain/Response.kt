@@ -1,5 +1,9 @@
 package dev.danielqueiroz.kbooks.domain
 
+import com.google.gson.Gson
+import io.ktor.http.*
+import io.ktor.http.content.*
+
 sealed class WebResponse {
     abstract val statusCode: Int
     abstract val headers: Map<String, List<String>>
@@ -58,4 +62,17 @@ data class JsonWebResponse(
         headers: Map<String, List<String>>
     ) =
         copy(body, statusCode, headers)
+}
+
+class KtorJsonWebResponse (
+    val body: Any?,
+    val statusCode: HttpStatusCode = HttpStatusCode.OK
+): OutgoingContent.ByteArrayContent() {
+
+    override val contentType: ContentType =
+        ContentType.Application.Json.withCharset(Charsets.UTF_8)
+
+    override fun bytes() = Gson().toJson(body).toByteArray(
+        Charsets.UTF_8
+    )
 }
