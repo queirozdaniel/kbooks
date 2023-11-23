@@ -47,8 +47,21 @@ fun Application.createKtorApplication() {
         }
     }
     routing {
-        get("/", webResponse{
+        get("/", webResponse {
             TextWebResponse("Hello, World!")
+        })
+
+        get("/param_test", webResponse {
+            TextWebResponse(
+                "The param is: ${call.request.queryParameters["foo"]}"
+            )
+        })
+        get("/json_test", webResponse {
+            JsonWebResponse(mapOf("foo" to "bar"))
+        })
+        get("/json_test_with_header", webResponse {
+            JsonWebResponse(mapOf("foo" to "bar"))
+                .header("X-Test-Header", "Just a test!")
         })
     }
 
@@ -72,6 +85,7 @@ fun webResponse(
                     status = statusCode
                 )
             }
+
             is JsonWebResponse -> {
                 call.respond(
                     KtorJsonWebResponse(
