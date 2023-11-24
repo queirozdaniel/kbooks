@@ -1,6 +1,8 @@
 package dev.danielqueiroz.kbooks
 
 import com.typesafe.config.ConfigFactory
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import dev.danielqueiroz.kbooks.domain.*
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -27,8 +29,19 @@ fun main(args: Array<String>) {
         .resolve().let {
             WebappConfig(
                 httpPort = it.getInt("httpPort"),
+                dbUser = it.getString("dbUser"),
+                dbPassword = it.getString("dbPassword"),
+                dbUrl = it.getString("dbUrl"),
             )
         }
+
+    val dataSource = createDataSource(config)
+
+    dataSource.getConnection().use { conn ->
+        conn.createStatement().use { stmt ->
+            stmt.execute("Select 1")
+        }
+    }
 
     embeddedServer(Netty, port = config.httpPort) {
         createKtorApplication()
@@ -97,3 +110,10 @@ fun webResponse(
         }
     }
 }
+
+fun createDataSource(config: WebappConfig) =
+    HikariDataSource().apply {
+        jdbcUrl = config.dbUrl
+        username = config.dbUser
+        password = config.dbPassword
+    }
