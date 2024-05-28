@@ -1,4 +1,4 @@
-package dev.danielqueiroz.kbooks.domain
+package dev.danielqueiroz.kbooks.api
 
 import com.google.gson.Gson
 import io.ktor.http.*
