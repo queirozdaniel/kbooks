@@ -1,9 +1,13 @@
 package dev.danielqueiroz.kbooks
 
 import com.typesafe.config.ConfigFactory
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
-import dev.danielqueiroz.kbooks.domain.*
+import dev.danielqueiroz.kbooks.api.JsonWebResponse
+import dev.danielqueiroz.kbooks.api.KtorJsonWebResponse
+import dev.danielqueiroz.kbooks.api.TextWebResponse
+import dev.danielqueiroz.kbooks.api.WebResponse
+import dev.danielqueiroz.kbooks.infra.WebappConfig
+import dev.danielqueiroz.kbooks.infra.createAndMigrateDataSource
+import dev.danielqueiroz.kbooks.infra.createDataSource
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -35,7 +39,7 @@ fun main(args: Array<String>) {
             )
         }
 
-    val dataSource = createDataSource(config)
+    val dataSource = createAndMigrateDataSource(config)
 
     dataSource.getConnection().use { conn ->
         conn.createStatement().use { stmt ->
@@ -111,9 +115,3 @@ fun webResponse(
     }
 }
 
-fun createDataSource(config: WebappConfig) =
-    HikariDataSource().apply {
-        jdbcUrl = config.dbUrl
-        username = config.dbUser
-        password = config.dbPassword
-    }
